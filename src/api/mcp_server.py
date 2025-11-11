@@ -164,15 +164,17 @@ async def handle_jsonrpc_request(
             }
 
         elif method == "tools/list":
+            # Auto-initialize se não foi inicializado (compatibilidade com Sellflux)
             if not session.initialized:
-                raise ValueError("Session not initialized")
-            
+                session.initialized = True
+
             tools = get_all_tools()
             result = {"tools": [t.model_dump() for t in tools]}
 
         elif method == "tools/call":
+            # Auto-initialize se não foi inicializado (compatibilidade com Sellflux)
             if not session.initialized:
-                raise ValueError("Session not initialized")
+                session.initialized = True
 
             tool_name = params.get("name")
             arguments = params.get("arguments", {})
