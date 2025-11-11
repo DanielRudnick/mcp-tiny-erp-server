@@ -449,6 +449,28 @@ async def mcp_info():
     })
 
 
+@router.get("/mcp/tools")
+async def mcp_tools_documentation():
+    """
+    Lista todas as ferramentas MCP disponíveis com documentação completa
+
+    Este endpoint retorna a lista de todas as 77+ ferramentas do Tiny ERP
+    que podem ser chamadas via MCP JSON-RPC no endpoint POST /mcp
+    """
+    tools = get_all_tools()
+    return JSONResponse(content={
+        "total": len(tools),
+        "tools": [
+            {
+                "name": tool.name,
+                "description": tool.description,
+                "inputSchema": tool.inputSchema
+            }
+            for tool in tools
+        ]
+    })
+
+
 @router.post("/mcp")
 @router.get("/mcp")
 async def mcp_endpoint(
