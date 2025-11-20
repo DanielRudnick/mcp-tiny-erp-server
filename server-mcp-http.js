@@ -115,20 +115,20 @@ const MCP_TOOLS = [
   },
   {
     name: "tiny_pedido_incluir",
-    description: "Cria um novo pedido no Tiny ERP. IMPORTANTE: Sempre pesquise o produto antes para obter id_produto, descricao, unidade e valor_unitario corretos.",
+    description: "Cria um novo pedido no Tiny ERP. IMPORTANTE: Sempre pesquise o produto antes para obter id_produto, descricao, unidade e valor_unitario. ESTRUTURA OBRIGATÓRIA: { pedido: { cliente: { id: 'ID_CLIENTE' }, itens: [{ item: { id_produto: 'ID', descricao: 'DESC', unidade: 'UN', quantidade: '1', valor_unitario: '100.00' } }] } }",
     inputSchema: {
       type: "object",
       properties: {
         pedido: {
           type: "object",
-          description: "Objeto contendo os dados completos do pedido",
+          description: "Objeto contendo os dados completos do pedido. ATENÇÃO: 'itens' é um array de objetos com a chave 'item' aninhada!",
           properties: {
             cliente: {
               type: "object",
-              description: "Dados do cliente. Use 'id' para cliente existente ou preencha outros campos para criar novo",
+              description: "OBRIGATÓRIO: Dados do cliente. Use SOMENTE a chave 'cliente' (não 'contato', 'contato_id' ou 'nome_cliente'). Para cliente existente use { id: 'ID_DO_CLIENTE' }",
               properties: {
-                id: { type: "string", description: "ID do cliente no Tiny (se já existir)" },
-                nome: { type: "string", description: "Nome completo do cliente" },
+                id: { type: "string", description: "ID do cliente no Tiny (recomendado se já existir)" },
+                nome: { type: "string", description: "Nome completo do cliente (obrigatório se não usar 'id')" },
                 cpf_cnpj: { type: "string", description: "CPF ou CNPJ (apenas números)" },
                 email: { type: "string", description: "Email do cliente" },
                 fone: { type: "string", description: "Telefone" },
@@ -142,19 +142,19 @@ const MCP_TOOLS = [
             },
             itens: {
               type: "array",
-              description: "Lista de itens do pedido",
+              description: "OBRIGATÓRIO: Array de itens. ATENÇÃO: Cada elemento do array DEVE ter a chave 'item' aninhada! Formato: [{ item: { id_produto, descricao, unidade, quantidade, valor_unitario } }]",
               items: {
                 type: "object",
                 properties: {
                   item: {
                     type: "object",
-                    description: "Dados do item",
+                    description: "OBRIGATÓRIO: Objeto 'item' aninhado contendo os dados do produto. NÃO coloque os campos direto no array!",
                     properties: {
-                      id_produto: { type: "string", description: "ID do produto no Tiny (obrigatório)" },
-                      descricao: { type: "string", description: "Descrição do produto (obrigatório)" },
-                      unidade: { type: "string", description: "Unidade de medida (ex: UN, PC, KG)" },
-                      quantidade: { type: "string", description: "Quantidade (formato: '1', '2.5')" },
-                      valor_unitario: { type: "string", description: "Valor unitário (formato: '100.00')" },
+                      id_produto: { type: "string", description: "OBRIGATÓRIO: ID do produto no Tiny (obtido via tiny_produto_obter ou tiny_produtos_pesquisar)" },
+                      descricao: { type: "string", description: "OBRIGATÓRIO: Descrição completa do produto" },
+                      unidade: { type: "string", description: "OBRIGATÓRIO: Unidade de medida (ex: UN, PÇ, PC, KG). Obtida via tiny_produto_obter" },
+                      quantidade: { type: "string", description: "OBRIGATÓRIO: Quantidade no formato STRING (ex: '1', '2.5')" },
+                      valor_unitario: { type: "string", description: "OBRIGATÓRIO: Valor unitário no formato STRING com ponto decimal (ex: '100.00', '154.97')" },
                     },
                     required: ["id_produto", "descricao", "unidade", "quantidade", "valor_unitario"],
                   },
