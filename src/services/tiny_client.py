@@ -67,7 +67,13 @@ class TinyAPIClient:
 
     async def incluir_pedido(self, pedido_data: Dict[str, Any]) -> Dict[str, Any]:
         """Inclui novo pedido"""
-        return await self._request("pedido.incluir", {"pedido": json.dumps(pedido_data)})
+        # Serializa o pedido em JSON compacto
+        pedido_json = json.dumps(pedido_data, ensure_ascii=False, separators=(',', ':'))
+        
+        # Debug: log do JSON sendo enviado (remover após testar)
+        print(f"[DEBUG] Enviando pedido para API Tiny: {pedido_json[:200]}...")
+        
+        return await self._request("pedido.incluir", {"pedido": pedido_json})
 
     async def alterar_pedido(self, pedido_id: str, pedido_data: Dict[str, Any]) -> Dict[str, Any]:
         """Altera pedido existente"""
