@@ -25,6 +25,7 @@ class TinyAPIClient:
         formato: str = "JSON"
     ) -> Dict[str, Any]:
         """Executa requisição para API Tiny"""
+        from urllib.parse import urlencode
         
         payload = {
             "token": self.token,
@@ -34,10 +35,16 @@ class TinyAPIClient:
         if data:
             payload.update(data)
         
+        # Montar payload manualmente como string URL-encoded
+        # para garantir que o campo "pedido" (que já é JSON string) não seja escapado novamente
+        payload_str = urlencode(payload, safe='')
+        
+        print(f"[DEBUG] Payload URL-encoded: {payload_str[:300]}...")
+        
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.post(
                 f"{self.base_url}/{endpoint}.php",
-                data=payload,
+                content=payload_str,
                 headers={"Content-Type": "application/x-www-form-urlencoded"}
             )
             response.raise_for_status()
