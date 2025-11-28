@@ -56,7 +56,59 @@ TOOLS_CATALOG: List[Tool] = [
         inputSchema={
             "type": "object",
             "properties": {
-                "pedido": {"type": "object", "description": "Dados do pedido"}
+                "pedido": {
+                    "type": "object",
+                    "description": "Dados do pedido a ser criado",
+                    "properties": {
+                        "data_pedido": {
+                            "type": "string",
+                            "description": "Data do pedido no formato DD/MM/YYYY"
+                        },
+                        "cliente": {
+                            "type": "object",
+                            "description": "Dados do cliente",
+                            "properties": {
+                                "nome": {"type": "string", "description": "Nome do cliente (obrigatorio)"},
+                                "tipo_pessoa": {"type": "string", "description": "F=Fisica, J=Juridica", "enum": ["F", "J"]},
+                                "cpf_cnpj": {"type": "string", "description": "CPF ou CNPJ do cliente"},
+                                "endereco": {"type": "string", "description": "Endereco do cliente"},
+                                "numero": {"type": "string", "description": "Numero do endereco"},
+                                "bairro": {"type": "string", "description": "Bairro"},
+                                "cidade": {"type": "string", "description": "Cidade"},
+                                "uf": {"type": "string", "description": "Estado (UF)"},
+                                "cep": {"type": "string", "description": "CEP"},
+                                "fone": {"type": "string", "description": "Telefone"},
+                                "email": {"type": "string", "description": "Email do cliente"}
+                            },
+                            "required": ["nome"]
+                        },
+                        "itens": {
+                            "type": "array",
+                            "description": "Lista de itens do pedido",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "item": {
+                                        "type": "object",
+                                        "description": "Dados do item",
+                                        "properties": {
+                                            "codigo": {"type": "string", "description": "Codigo/SKU do produto"},
+                                            "descricao": {"type": "string", "description": "Descricao do produto (obrigatorio)"},
+                                            "unidade": {"type": "string", "description": "Unidade de medida (obrigatorio, ex: UN, PC, KG)"},
+                                            "quantidade": {"type": "string", "description": "Quantidade do item (obrigatorio)"},
+                                            "valor_unitario": {"type": "string", "description": "Valor unitario (obrigatorio)"}
+                                        },
+                                        "required": ["descricao", "unidade", "quantidade", "valor_unitario"]
+                                    }
+                                },
+                                "required": ["item"]
+                            }
+                        },
+                        "forma_pagamento": {"type": "string", "description": "Forma de pagamento"},
+                        "observacoes": {"type": "string", "description": "Observacoes do pedido"}
+                    },
+                    "required": ["cliente", "itens"]
+                }
             },
             "required": ["pedido"]
         }
