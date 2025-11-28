@@ -37,9 +37,15 @@ class TinyAPIClient:
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             response = await client.post(
                 f"{self.base_url}/{endpoint}.php",
-                data=payload
+                data=payload,
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
             )
             response.raise_for_status()
+            
+            # Debug: log da resposta
+            print(f"[DEBUG] Response status: {response.status_code}")
+            print(f"[DEBUG] Response body: {response.text[:500]}")
+            
             return response.json()
 
     # =========================================================================
