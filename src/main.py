@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 import uvicorn
 
 from src.api.mcp_server import router as mcp_router
+from src.api.test_endpoints import router as test_router
 
 # Inicializa FastAPI
 app = FastAPI(
@@ -30,6 +31,7 @@ app.add_middleware(
 
 # Registra routers
 app.include_router(mcp_router)
+app.include_router(test_router)
 
 # Health check
 @app.get("/health")
