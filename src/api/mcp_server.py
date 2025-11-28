@@ -226,7 +226,12 @@ async def execute_tiny_tool(
     elif tool_name == "tiny_pedido_obter":
         return await client.obter_pedido(arguments.get("id"))
     elif tool_name == "tiny_pedido_incluir":
-        return await client.incluir_pedido(arguments.get("pedido"))
+        pedido_data = arguments.get("pedido")
+        print(f"[DEBUG MCP] Recebido pedido: {str(pedido_data)[:200]}...")
+        print(f"[DEBUG MCP] Tipo: {type(pedido_data)}")
+        if pedido_data:
+            print(f"[DEBUG MCP] Keys: {pedido_data.keys() if isinstance(pedido_data, dict) else 'N/A'}")
+        return await client.incluir_pedido(pedido_data)
     elif tool_name == "tiny_pedido_alterar":
         return await client.alterar_pedido(arguments.get("id"), arguments.get("pedido"))
     elif tool_name == "tiny_pedido_alterar_situacao":
