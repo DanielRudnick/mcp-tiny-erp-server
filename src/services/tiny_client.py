@@ -85,17 +85,33 @@ class TinyAPIClient:
 
         pedido = pedido_data.copy()
 
-        # Corrigir formato de data se estiver em MM/DD/YYYY
+        # Corrigir formato de data - SEMPRE usar DD/MM/YYYY (brasileiro)
         if "data_pedido" in pedido:
             data_str = pedido["data_pedido"]
-            # Tentar detectar se está em formato MM/DD/YYYY (mês > 12 indica formato errado)
             try:
                 parts = data_str.split("/")
-                if len(parts) == 3 and int(parts[0]) > 12:  # MM/DD/YYYY
-                    pedido["data_pedido"] = f"{parts[1]}/{parts[0]}/{parts[2]}"
-                    print(f"[SANITIZE] Data corrigida: {data_str} -> {pedido['data_pedido']}")
-            except:
-                pass
+                if len(parts) == 3:
+                    dia, mes, ano = int(parts[0]), int(parts[1]), int(parts[2])
+                    
+                    # Se mês > 12, certeza que é formato MM/DD/YYYY errado
+                    if mes > 12:
+                        pedido["data_pedido"] = f"{parts[1]}/{parts[0]}/{parts[2]}"
+                        print(f"[SANITIZE] Data corrigida (mês>12): {data_str} -> {pedido['data_pedido']}")
+                    # Se dia > 12 E mês <= 12, formato está correto (DD/MM/YYYY)
+                    elif dia > 12 and mes <= 12:
+                        pass  # Já está correto
+                    # Se ambos <= 12, verificar qual formato é válido
+                    elif dia <= 12 and mes <= 12:
+                        # Tentar validar como DD/MM/YYYY
+                        try:
+                            datetime.strptime(data_str, "%d/%m/%Y")
+                            # Válido como DD/MM/YYYY, manter
+                        except ValueError:
+                            # Inválido como DD/MM/YYYY, converter de MM/DD/YYYY
+                            pedido["data_pedido"] = f"{parts[1]}/{parts[0]}/{parts[2]}"
+                            print(f"[SANITIZE] Data corrigida (inválida DD/MM): {data_str} -> {pedido['data_pedido']}")
+            except Exception as e:
+                print(f"[SANITIZE] Erro ao processar data: {e}")
 
         # Sanitizar dados do cliente
         if "cliente" in pedido and isinstance(pedido["cliente"], dict):
