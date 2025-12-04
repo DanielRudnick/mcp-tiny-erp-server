@@ -224,8 +224,20 @@ class TinyAPIClient:
 
     async def incluir_contato(self, contato_data: Dict[str, Any]) -> Dict[str, Any]:
         """Inclui novo contato"""
-        # IMPORTANTE: API Tiny espera {"contato": {...}} no JSON
-        contato_wrapper = {"contato": contato_data}
+        # Adicionar campos obrigatórios conforme documentação
+        if "sequencia" not in contato_data:
+            contato_data["sequencia"] = "1"
+        if "situacao" not in contato_data:
+            contato_data["situacao"] = "A"  # A=Ativo (padrão)
+
+        # IMPORTANTE: API Tiny espera {"contatos": [{"contato": {...}}]}
+        contato_wrapper = {
+            "contatos": [
+                {
+                    "contato": contato_data
+                }
+            ]
+        }
         contato_json = json.dumps(contato_wrapper, ensure_ascii=True, separators=(",", ":"))
 
         print(f"[DEBUG] Enviando contato para API Tiny: {contato_json[:200]}...")
