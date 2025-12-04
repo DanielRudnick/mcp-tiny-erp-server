@@ -277,11 +277,30 @@ TOOLS_CATALOG: List[Tool] = [
     
     Tool(
         name="tiny_contato_incluir",
-        description="Cadastra novo contato",
+        description="Cadastra novo contato/cliente no Tiny ERP",
         inputSchema={
             "type": "object",
             "properties": {
-                "contato": {"type": "object", "description": "Dados do contato"}
+                "contato": {
+                    "type": "object",
+                    "description": "Dados do contato/cliente",
+                    "properties": {
+                        "nome": {"type": "string", "description": "Nome completo (obrigatorio)"},
+                        "tipo_pessoa": {"type": "string", "description": "F=Fisica, J=Juridica", "enum": ["F", "J"]},
+                        "cpf_cnpj": {"type": "string", "description": "CPF (11 digitos) ou CNPJ (14 digitos)"},
+                        "endereco": {"type": "string", "description": "Endereco completo"},
+                        "numero": {"type": "string", "description": "Numero do endereco"},
+                        "complemento": {"type": "string", "description": "Complemento"},
+                        "bairro": {"type": "string", "description": "Bairro"},
+                        "cidade": {"type": "string", "description": "Cidade"},
+                        "uf": {"type": "string", "description": "Estado (UF - 2 letras)"},
+                        "cep": {"type": "string", "description": "CEP"},
+                        "fone": {"type": "string", "description": "Telefone fixo"},
+                        "celular": {"type": "string", "description": "Celular"},
+                        "email": {"type": "string", "description": "Email"}
+                    },
+                    "required": ["nome"]
+                }
             },
             "required": ["contato"]
         }
@@ -289,12 +308,30 @@ TOOLS_CATALOG: List[Tool] = [
     
     Tool(
         name="tiny_contato_alterar",
-        description="Altera contato existente",
+        description="Altera contato/cliente existente no Tiny ERP",
         inputSchema={
             "type": "object",
             "properties": {
-                "id": {"type": "string", "description": "ID do contato"},
-                "contato": {"type": "object", "description": "Dados atualizados"}
+                "id": {"type": "string", "description": "ID do contato no Tiny ERP"},
+                "contato": {
+                    "type": "object",
+                    "description": "Dados a serem atualizados",
+                    "properties": {
+                        "nome": {"type": "string", "description": "Nome completo"},
+                        "tipo_pessoa": {"type": "string", "description": "F=Fisica, J=Juridica", "enum": ["F", "J"]},
+                        "cpf_cnpj": {"type": "string", "description": "CPF ou CNPJ"},
+                        "endereco": {"type": "string", "description": "Endereco"},
+                        "numero": {"type": "string", "description": "Numero"},
+                        "complemento": {"type": "string", "description": "Complemento"},
+                        "bairro": {"type": "string", "description": "Bairro"},
+                        "cidade": {"type": "string", "description": "Cidade"},
+                        "uf": {"type": "string", "description": "UF"},
+                        "cep": {"type": "string", "description": "CEP"},
+                        "fone": {"type": "string", "description": "Telefone"},
+                        "celular": {"type": "string", "description": "Celular"},
+                        "email": {"type": "string", "description": "Email"}
+                    }
+                }
             },
             "required": ["id", "contato"]
         }
