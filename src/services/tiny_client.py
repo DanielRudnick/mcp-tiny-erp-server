@@ -224,7 +224,13 @@ class TinyAPIClient:
 
     async def incluir_contato(self, contato_data: Dict[str, Any]) -> Dict[str, Any]:
         """Inclui novo contato"""
-        return await self._request("contato.incluir", {"contato": json.dumps(contato_data)})
+        # IMPORTANTE: API Tiny espera {"contato": {...}} no JSON
+        contato_wrapper = {"contato": contato_data}
+        contato_json = json.dumps(contato_wrapper, ensure_ascii=True, separators=(",", ":"))
+
+        print(f"[DEBUG] Enviando contato para API Tiny: {contato_json[:200]}...")
+
+        return await self._request("contato.incluir", {"contato": contato_json})
 
     async def alterar_contato(self, contato_id: str, contato_data: Dict[str, Any]) -> Dict[str, Any]:
         """Altera contato existente"""
