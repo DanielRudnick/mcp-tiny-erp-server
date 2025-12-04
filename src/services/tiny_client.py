@@ -190,6 +190,32 @@ class TinyAPIClient:
     # CONTATOS / CLIENTES
     # =========================================================================
 
+    def _format_cpf_cnpj_for_search(self, pesquisa: str) -> str:
+        """Formata CPF/CNPJ se a pesquisa for apenas números"""
+        import re
+        
+        # Remove todos os caracteres não-numéricos
+        apenas_numeros = re.sub(r'[^0-9]', '', pesquisa)
+        
+        # Se não for só números, retorna original
+        if len(apenas_numeros) != len(pesquisa):
+            return pesquisa
+        
+        # CPF: 11 dígitos -> XXX.XXX.XXX-XX
+        if len(apenas_numeros) == 11:
+            cpf_formatado = f"{apenas_numeros[:3]}.{apenas_numeros[3:6]}.{apenas_numeros[6:9]}-{apenas_numeros[9:]}"
+            print(f"[FORMAT] CPF para pesquisa: {pesquisa} -> {cpf_formatado}")
+            return cpf_formatado
+        
+        # CNPJ: 14 dígitos -> XX.XXX.XXX/XXXX-XX
+        if len(apenas_numeros) == 14:
+            cnpj_formatado = f"{apenas_numeros[:2]}.{apenas_numeros[2:5]}.{apenas_numeros[5:8]}/{apenas_numeros[8:12]}-{apenas_numeros[12:]}"
+            print(f"[FORMAT] CNPJ para pesquisa: {pesquisa} -> {cnpj_formatado}")
+            return cnpj_formatado
+        
+        # Se não for CPF nem CNPJ, retorna original
+        return pesquisa
+
     async def pesquisar_contatos(
         self,
         pesquisa: str = "",
@@ -197,7 +223,9 @@ class TinyAPIClient:
         tipo_pessoa: Optional[str] = None
     ) -> Dict[str, Any]:
         """Pesquisa contatos/clientes"""
-        data = {"pesquisa": pesquisa, "pagina": pagina}
+        # Formatar CPF/CNPJ se necessário
+        pesquisa_formatada = self._format_cpf_cnpj_for_search(pesquisa)
+        data = {"pesquisa": pesquisa_formatada, "pagina": pagina}
         if tipo_pessoa:
             data["tipoPessoa"] = tipo_pessoa
         return await self._request("contatos.pesquisa", data)
