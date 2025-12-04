@@ -78,10 +78,52 @@ class TinyAPIClient:
         """Obtém detalhes de um pedido específico"""
         return await self._request("pedido.obter", {"id": pedido_id})
 
+    def _sanitize_pedido_data(self, pedido_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Sanitiza dados do pedido antes de enviar para API Tiny"""
+        import re
+        from datetime import datetime
+
+        pedido = pedido_data.copy()
+
+        # Corrigir formato de data se estiver em MM/DD/YYYY
+        if "data_pedido" in pedido:
+            data_str = pedido["data_pedido"]
+            # Tentar detectar se está em formato MM/DD/YYYY (mês > 12 indica formato errado)
+            try:
+                parts = data_str.split("/")
+                if len(parts) == 3 and int(parts[0]) > 12:  # MM/DD/YYYY
+                    pedido["data_pedido"] = f"{parts[1]}/{parts[0]}/{parts[2]}"
+                    print(f"[SANITIZE] Data corrigida: {data_str} -> {pedido['data_pedido']}")
+            except:
+                pass
+
+        # Sanitizar dados do cliente
+        if "cliente" in pedido and isinstance(pedido["cliente"], dict):
+            cliente = pedido["cliente"]
+
+            # Remover pontos e traços de CPF/CNPJ
+            if "cpf_cnpj" in cliente:
+                cpf_cnpj_original = cliente["cpf_cnpj"]
+                cliente["cpf_cnpj"] = re.sub(r'[.\-/]', '', str(cliente["cpf_cnpj"]))
+                if cpf_cnpj_original != cliente["cpf_cnpj"]:
+                    print(f"[SANITIZE] CPF/CNPJ: {cpf_cnpj_original} -> {cliente['cpf_cnpj']}")
+
+            # Remover pontos de CEP (manter apenas números e hífen)
+            if "cep" in cliente:
+                cep_original = cliente["cep"]
+                cliente["cep"] = re.sub(r'\.', '', str(cliente["cep"]))
+                if cep_original != cliente["cep"]:
+                    print(f"[SANITIZE] CEP: {cep_original} -> {cliente['cep']}")
+
+        return pedido
+
     async def incluir_pedido(self, pedido_data: Dict[str, Any]) -> Dict[str, Any]:
         """Inclui novo pedido"""
+        # Sanitizar dados antes de enviar
+        pedido_sanitized = self._sanitize_pedido_data(pedido_data)
+
         # IMPORTANTE: API Tiny espera {"pedido": {...}} no JSON
-        pedido_wrapper = {"pedido": pedido_data}
+        pedido_wrapper = {"pedido": pedido_sanitized}
         pedido_json = json.dumps(pedido_wrapper, ensure_ascii=True, separators=(',', ':'))
 
         # Debug: log do JSON sendo enviado (remover após testar)
