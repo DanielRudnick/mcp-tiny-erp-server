@@ -246,8 +246,26 @@ class TinyAPIClient:
 
     async def alterar_contato(self, contato_id: str, contato_data: Dict[str, Any]) -> Dict[str, Any]:
         """Altera contato existente"""
-        data = {"id": contato_id, "contato": json.dumps(contato_data)}
-        return await self._request("contato.alterar", data)
+        # Adicionar campos obrigatórios
+        contato_data["id"] = contato_id
+        if "sequencia" not in contato_data:
+            contato_data["sequencia"] = "1"
+        if "situacao" not in contato_data:
+            contato_data["situacao"] = "A"
+
+        # IMPORTANTE: API Tiny espera {"contatos": [{"contato": {...}}]}
+        contato_wrapper = {
+            "contatos": [
+                {
+                    "contato": contato_data
+                }
+            ]
+        }
+        contato_json = json.dumps(contato_wrapper, ensure_ascii=True, separators=(",", ":"))
+
+        print(f"[DEBUG] Alterando contato ID {contato_id}: {contato_json[:200]}...")
+
+        return await self._request("contato.alterar", {"contato": contato_json})
 
     # =========================================================================
     # NOTAS FISCAIS
