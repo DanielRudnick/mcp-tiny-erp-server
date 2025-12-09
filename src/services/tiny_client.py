@@ -246,30 +246,45 @@ class TinyAPIClient:
 
     async def alterar_contato(self, contato_id: str, contato_data: Dict[str, Any]) -> Dict[str, Any]:
         """Altera contato existente"""
+        # IMPORTANTE: API Tiny sobrescreve completamente o registro
+        # Por isso, precisamos buscar os dados atuais primeiro e fazer merge
+        
+        print(f"[DEBUG] Buscando dados atuais do contato ID {contato_id}...")
+        
+        # Buscar dados atuais do contato
+        resultado_busca = await self.obter_contato(contato_id)
+        
+        # Extrair dados do contato da resposta
+        contato_atual = {}
+        if "retorno" in resultado_busca and "contato" in resultado_busca["retorno"]:
+            contato_atual = resultado_busca["retorno"]["contato"]
+            print(f"[DEBUG] Contato encontrado: {contato_atual.get('nome', 'N/A')}")
+        else:
+            print(f"[WARN] Não foi possível buscar dados atuais do contato {contato_id}")
+        
+        # Fazer merge: dados atuais + dados novos (novos sobrescrevem)
+        contato_merged = {**contato_atual, **contato_data}
+        
         # Adicionar campos obrigatórios
-        contato_data["id"] = contato_id
-        if "sequencia" not in contato_data:
-            contato_data["sequencia"] = "1"
-        if "situacao" not in contato_data:
-            contato_data["situacao"] = "A"
+        contato_merged["id"] = contato_id
+        if "sequencia" not in contato_merged:
+            contato_merged["sequencia"] = "1"
+        if "situacao" not in contato_merged:
+            contato_merged["situacao"] = "A"
 
         # IMPORTANTE: API Tiny espera {"contatos": [{"contato": {...}}]}
         contato_wrapper = {
             "contatos": [
                 {
-                    "contato": contato_data
+                    "contato": contato_merged
                 }
             ]
         }
-        contato_json = json.dumps(contato_wrapper, ensure_ascii=True, separators=(",", ":"))
+        contato_json = json.dumps(contato_wrapper, ensure_ascii=True, separators=(',', ':'))
 
-        print(f"[DEBUG] Alterando contato ID {contato_id}: {contato_json[:200]}...")
+        print(f"[DEBUG] Alterando contato ID {contato_id} (campos: {list(contato_data.keys())})")
 
         return await self._request("contato.alterar", {"contato": contato_json})
-
-    # =========================================================================
-    # NOTAS FISCAIS
-    # =========================================================================
 
     async def pesquisar_notas_fiscais(
         self,
