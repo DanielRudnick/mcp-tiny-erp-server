@@ -1,0 +1,26 @@
+{
+  "pedido": {
+    "itens": [
+      {
+        "item": {
+          "codigo": "014000001",
+          "unidade": "UN",
+          "descricao": "Headset Wireless Gamer, Kalkan Ragnar, Sem Fio, RGB, 7.1 Surround Virtual, Preto - KLK025",
+          "quantidade": "1",
+          "valor_unitario": "294.97"
+        }
+      }
+    ],
+    "cliente": {
+      "fone": "41998251197",
+      "nome": "Daniel Rudnick",
+      "email": "d.rudnick.dr@gmail.com",
+      "cidade": "São Caetano do Sul",
+      "cpf_cnpj": "11283871904",
+      "tipo_pessoa": "F"
+    },
+    "data_pedido": "28/11/2025",
+    "observacoes": "Pedido via WhatsApp. Cliente confirmado por e-mail.",
+    "forma_pagamento": "A combinar"
+  }
+}

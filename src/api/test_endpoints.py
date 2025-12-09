@@ -94,6 +94,33 @@ async def simulate_mcp_call(arguments: Dict[str, Any] = Body(...)):
     }
 
 
+@router.post("/produto/search-test", summary="Testa pesquisa de produtos")
+async def test_produto_search(termo: str = Body(..., embed=True)):
+    """
+    Testa como a pesquisa de produtos seria feita na API Tiny.
+
+    Use este endpoint para testar diferentes termos de busca
+    e ver qual retorna resultados.
+    """
+    from src.services.tiny_client import TinyClient
+    import os
+
+    token = os.getenv("TINY_API_TOKEN")
+    if not token:
+        return {"erro": "TINY_API_TOKEN não configurado"}
+
+    client = TinyClient(token)
+
+    # Testar pesquisa
+    resultado = await client.pesquisar_produtos(pesquisa=termo)
+
+    return {
+        "termo_pesquisado": termo,
+        "resultado_api": resultado,
+        "info": "Se retornou 'A consulta não retornou registros', significa que o termo não existe EXATAMENTE como cadastrado no Tiny"
+    }
+
+
 @router.get("/health", summary="Health check do módulo de testes")
 async def test_health():
     """Health check"""

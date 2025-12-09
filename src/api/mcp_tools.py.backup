@@ -52,60 +52,16 @@ TOOLS_CATALOG: List[Tool] = [
     
     Tool(
         name="tiny_pedido_incluir",
-        description="Cria um novo pedido no Tiny ERP",
+        description="Cria um novo pedido no Tiny ERP. Campos obrigatórios no objeto pedido: cliente (objeto com nome ou id), itens (array com item.codigo, item.descricao, item.unidade, item.quantidade, item.valor_unitario)",
         inputSchema={
             "type": "object",
             "properties": {
                 "pedido": {
                     "type": "object",
-                    "description": "Dados do pedido a ser criado",
+                    "description": "Dados do pedido. Exemplo: {\"cliente\": {\"nome\": \"João Silva\", \"cpf_cnpj\": \"12345678901\"}, \"itens\": [{\"item\": {\"codigo\": \"123\", \"descricao\": \"Produto X\", \"unidade\": \"UN\", \"quantidade\": 1, \"valor_unitario\": 100.00}}]}",
                     "properties": {
-                        "data_pedido": {
-                            "type": "string",
-                            "description": "Data do pedido no formato DD/MM/YYYY"
-                        },
-                        "cliente": {
-                            "type": "object",
-                            "description": "Dados do cliente",
-                            "properties": {
-                                "nome": {"type": "string", "description": "Nome do cliente (obrigatorio)"},
-                                "tipo_pessoa": {"type": "string", "description": "F=Fisica, J=Juridica", "enum": ["F", "J"]},
-                                "cpf_cnpj": {"type": "string", "description": "CPF ou CNPJ do cliente"},
-                                "endereco": {"type": "string", "description": "Endereco do cliente"},
-                                "numero": {"type": "string", "description": "Numero do endereco"},
-                                "bairro": {"type": "string", "description": "Bairro"},
-                                "cidade": {"type": "string", "description": "Cidade"},
-                                "uf": {"type": "string", "description": "Estado (UF)"},
-                                "cep": {"type": "string", "description": "CEP"},
-                                "fone": {"type": "string", "description": "Telefone"},
-                                "email": {"type": "string", "description": "Email do cliente"}
-                            },
-                            "required": ["nome"]
-                        },
-                        "itens": {
-                            "type": "array",
-                            "description": "Lista de itens do pedido",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "item": {
-                                        "type": "object",
-                                        "description": "Dados do item",
-                                        "properties": {
-                                            "codigo": {"type": "string", "description": "Codigo/SKU do produto"},
-                                            "descricao": {"type": "string", "description": "Descricao do produto (obrigatorio)"},
-                                            "unidade": {"type": "string", "description": "Unidade de medida (obrigatorio, ex: UN, PC, KG)"},
-                                            "quantidade": {"type": "string", "description": "Quantidade do item (obrigatorio)"},
-                                            "valor_unitario": {"type": "string", "description": "Valor unitario (obrigatorio)"}
-                                        },
-                                        "required": ["descricao", "unidade", "quantidade", "valor_unitario"]
-                                    }
-                                },
-                                "required": ["item"]
-                            }
-                        },
-                        "forma_pagamento": {"type": "string", "description": "Forma de pagamento"},
-                        "observacoes": {"type": "string", "description": "Observacoes do pedido"}
+                        "cliente": {"type": "object", "description": "Dados do cliente (nome, cpf_cnpj, email, telefone, endereco, etc)"},
+                        "itens": {"type": "array", "description": "Lista de itens do pedido"}
                     },
                     "required": ["cliente", "itens"]
                 }
@@ -158,14 +114,14 @@ TOOLS_CATALOG: List[Tool] = [
     
     Tool(
         name="tiny_produtos_pesquisar",
-        description="Pesquisa produtos no Tiny ERP. IMPORTANTE: A pesquisa do Tiny é EXATA - precisa usar o nome COMPLETO do produto como está cadastrado no sistema. Use a ferramenta products_269836_list PRIMEIRO para encontrar produtos (ela tem busca inteligente), depois use esta ferramenta com o NOME EXATO retornado para obter preço e estoque atualizados do Tiny.",
+        description="[ESSENCIAL PARA VENDAS] Use esta ferramenta para pesquisar produtos, itens, mercadorias ou qualquer coisa do catálogo quando o cliente quiser saber o preço, estoque ou disponibilidade. O usuário vai perguntar por nome, marca ou categoria (ex: 'mouse gamer', 'teclado', 'kalkan thor').",
         inputSchema={
             "type": "object",
             "properties": {
-                "pesquisa": {"type": "string", "description": "Nome COMPLETO e EXATO do produto como cadastrado no Tiny (ex: 'Processador Intel Core i5-9500' ao invés de 'i5 9ª geração')"},
+                "pesquisa": {"type": "string", "description": "Nome, código ou SKU"},
                 "pagina": {"type": "integer", "default": 1},
-                "situacao": {"type": "string", "enum": ["A", "I", "E"], "default": "A", "description": "A=Ativo, I=Inativo, E=Excluído"},
-                "gtin": {"type": "string", "description": "Código de barras (EAN)"}
+                "situacao": {"type": "string", "enum": ["A", "I", "E"], "default": "A"},
+                "gtin": {"type": "string", "description": "Código de barras"}
             },
             "required": ["pesquisa"]
         }
@@ -185,11 +141,23 @@ TOOLS_CATALOG: List[Tool] = [
     
     Tool(
         name="tiny_produto_incluir",
-        description="Cadastra um novo produto",
+        description="Cadastra um novo produto. Campos obrigatórios: nome, unidade, preco, origem, situacao (A/I), tipo (P=Produto, S=Serviço)",
         inputSchema={
             "type": "object",
             "properties": {
-                "produto": {"type": "object", "description": "Dados do produto"}
+                "produto": {
+                    "type": "object",
+                    "description": "Dados do produto. Exemplo: {\"nome\": \"Produto X\", \"unidade\": \"UN\", \"preco\": 100.00, \"origem\": \"0\", \"situacao\": \"A\", \"tipo\": \"P\"}",
+                    "properties": {
+                        "nome": {"type": "string", "description": "Nome do produto (obrigatório)"},
+                        "unidade": {"type": "string", "description": "Unidade de medida (obrigatório)"},
+                        "preco": {"type": "number", "description": "Preço (obrigatório)"},
+                        "origem": {"type": "string", "description": "Origem fiscal 0-8 (obrigatório)"},
+                        "situacao": {"type": "string", "description": "A=Ativo, I=Inativo (obrigatório)"},
+                        "tipo": {"type": "string", "description": "P=Produto, S=Serviço (obrigatório)"}
+                    },
+                    "required": ["nome", "unidade", "preco", "origem", "situacao", "tipo"]
+                }
             },
             "required": ["produto"]
         }
@@ -277,29 +245,22 @@ TOOLS_CATALOG: List[Tool] = [
     
     Tool(
         name="tiny_contato_incluir",
-        description="Cadastra novo contato/cliente no Tiny ERP",
+        description="Cadastra novo contato/cliente. Campos obrigatórios: nome, situacao (A=Ativo, I=Inativo)",
         inputSchema={
             "type": "object",
             "properties": {
                 "contato": {
                     "type": "object",
-                    "description": "Dados do contato/cliente",
+                    "description": "Dados do contato. Exemplo: {\"nome\": \"João Silva\", \"tipo_pessoa\": \"F\", \"cpf_cnpj\": \"12345678901\", \"email\": \"joao@example.com\", \"fone\": \"11999999999\", \"situacao\": \"A\"}",
                     "properties": {
-                        "nome": {"type": "string", "description": "Nome completo (obrigatorio)"},
-                        "tipo_pessoa": {"type": "string", "description": "F=Fisica, J=Juridica", "enum": ["F", "J"]},
-                        "cpf_cnpj": {"type": "string", "description": "CPF (11 digitos) ou CNPJ (14 digitos)"},
-                        "endereco": {"type": "string", "description": "Endereco completo"},
-                        "numero": {"type": "string", "description": "Numero do endereco"},
-                        "complemento": {"type": "string", "description": "Complemento"},
-                        "bairro": {"type": "string", "description": "Bairro"},
-                        "cidade": {"type": "string", "description": "Cidade"},
-                        "uf": {"type": "string", "description": "Estado (UF - 2 letras)"},
-                        "cep": {"type": "string", "description": "CEP"},
-                        "fone": {"type": "string", "description": "Telefone fixo"},
-                        "celular": {"type": "string", "description": "Celular"},
-                        "email": {"type": "string", "description": "Email"}
+                        "nome": {"type": "string", "description": "Nome do contato (obrigatório)"},
+                        "situacao": {"type": "string", "description": "A=Ativo, I=Inativo, S=Sem movimento (obrigatório)"},
+                        "tipo_pessoa": {"type": "string", "description": "F=Física, J=Jurídica, E=Estrangeiro"},
+                        "cpf_cnpj": {"type": "string", "description": "CPF ou CNPJ"},
+                        "email": {"type": "string", "description": "Email"},
+                        "fone": {"type": "string", "description": "Telefone"}
                     },
-                    "required": ["nome"]
+                    "required": ["nome", "situacao"]
                 }
             },
             "required": ["contato"]
@@ -308,30 +269,12 @@ TOOLS_CATALOG: List[Tool] = [
     
     Tool(
         name="tiny_contato_alterar",
-        description="Altera contato/cliente existente no Tiny ERP",
+        description="Altera contato existente",
         inputSchema={
             "type": "object",
             "properties": {
-                "id": {"type": "string", "description": "ID do contato no Tiny ERP"},
-                "contato": {
-                    "type": "object",
-                    "description": "Dados a serem atualizados",
-                    "properties": {
-                        "nome": {"type": "string", "description": "Nome completo"},
-                        "tipo_pessoa": {"type": "string", "description": "F=Fisica, J=Juridica", "enum": ["F", "J"]},
-                        "cpf_cnpj": {"type": "string", "description": "CPF ou CNPJ"},
-                        "endereco": {"type": "string", "description": "Endereco"},
-                        "numero": {"type": "string", "description": "Numero"},
-                        "complemento": {"type": "string", "description": "Complemento"},
-                        "bairro": {"type": "string", "description": "Bairro"},
-                        "cidade": {"type": "string", "description": "Cidade"},
-                        "uf": {"type": "string", "description": "UF"},
-                        "cep": {"type": "string", "description": "CEP"},
-                        "fone": {"type": "string", "description": "Telefone"},
-                        "celular": {"type": "string", "description": "Celular"},
-                        "email": {"type": "string", "description": "Email"}
-                    }
-                }
+                "id": {"type": "string", "description": "ID do contato"},
+                "contato": {"type": "object", "description": "Dados atualizados"}
             },
             "required": ["id", "contato"]
         }
@@ -682,7 +625,7 @@ TOOLS_CATALOG: List[Tool] = [
     
     Tool(
         name="tiny_orcamentos_pesquisar",
-        description="Pesquisa orçamentos",
+        description="[NÃO USE PARA VENDAS] Use esta ferramenta SOMENTE se o cliente perguntar especificamente sobre um 'orçamento' ou 'cotação' já existente. NÃO USE para pesquisar produtos ou itens do catálogo.",
         inputSchema={
             "type": "object",
             "properties": {
@@ -800,7 +743,7 @@ TOOLS_CATALOG: List[Tool] = [
     
     Tool(
         name="tiny_kits_pesquisar",
-        description="Pesquisa kits de produtos",
+        description="[NÃO USE PARA VENDAS] Use esta ferramenta SOMENTE se o cliente perguntar especificamente sobre um 'kit' ou 'combo' de produtos. NÃO USE para pesquisar itens individuais.",
         inputSchema={
             "type": "object",
             "properties": {
