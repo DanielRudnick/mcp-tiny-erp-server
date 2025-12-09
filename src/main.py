@@ -50,7 +50,36 @@ async def root():
         "version": "2.0.0",
         "status": "online",
         "mcp_endpoint": "/mcp",
-        "docs": "/docs"
+        "docs": "/docs",
+        "tools": "/tools"
+    })
+
+
+
+# Endpoint para listar todas as tools MCP
+@app.get("/tools", summary="Lista todas as tools MCP disponíveis", tags=["📋 Documentação"])
+async def list_tools():
+    """
+    Retorna a lista completa de todas as 77 tools MCP disponíveis no servidor.
+
+    Cada tool inclui:
+    - **name**: Nome da tool
+    - **description**: Descrição do que a tool faz  
+    - **inputSchema**: Schema JSON dos parâmetros aceitos
+    """
+    from src.api.mcp_tools import TOOLS
+
+    tools_list = []
+    for tool in TOOLS:
+        tools_list.append({
+            "name": tool.name,
+            "description": tool.description,
+            "inputSchema": tool.inputSchema
+        })
+
+    return JSONResponse(content={
+        "total": len(tools_list),
+        "tools": tools_list
     })
 
 
