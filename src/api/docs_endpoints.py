@@ -3,7 +3,7 @@ Endpoints de documentação visual
 """
 from fastapi import APIRouter
 from fastapi.responses import HTMLResponse, JSONResponse
-from src.api.mcp_tools import TOOLS
+from src.api.mcp_tools import TOOLS_CATALOG as TOOLS
 
 router = APIRouter(prefix="/docs-mcp", tags=["📚 Documentação MCP"])
 
