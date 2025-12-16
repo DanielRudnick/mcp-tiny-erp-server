@@ -173,11 +173,11 @@ TOOLS_CATALOG: List[Tool] = [
     
     Tool(
         name="tiny_produto_obter",
-        description="Obtém detalhes completos de um produto",
+        description="Obtém TODOS os dados atualizados de um produto (preço em tempo real, estoque atual, descrição completa, categoria, marca, imagens, etc). Use esta ferramenta após buscar produtos para obter informações precisas e atualizadas do sistema Tiny.",
         inputSchema={
             "type": "object",
             "properties": {
-                "id": {"type": "string", "description": "ID do produto"}
+                "id": {"type": "string", "description": "ID do produto retornado pela busca"}
             },
             "required": ["id"]
         }
